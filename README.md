@@ -78,4 +78,17 @@ TODO
 
 ## Cite this work
 
-TODO
+```bibtex
+@inproceedings{chen2025elfuzz,
+  title = {{ELFuzz}: {Efficient} Input Generation via LLM-driven Synthesis Over
+Fuzzer Space},
+  booktitle = {Proceedings of the 34th {USENIX Security Symposium} ({USENIX} {Security} 2025)},
+  author = {Chen, Chuyang and Dolan-Gavitt, Brendan and Lin, Zhiqiang},
+  year = {2025},
+  pages = {6279--6298},
+  month = {8},
+  publisher = {USENIX Association},
+  address = {Seattle, WA, USA},
+  copyright = {All rights reserved},
+}
+```
