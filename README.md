@@ -88,7 +88,6 @@ Fuzzer Space},
   pages = {6279--6298},
   month = {8},
   publisher = {USENIX Association},
-  address = {Seattle, WA, USA},
-  copyright = {All rights reserved},
+  address = {Seattle, WA, USA}
 }
 ```
