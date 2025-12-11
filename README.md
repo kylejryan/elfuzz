@@ -4,6 +4,31 @@
 
 This repository contains the source code of the replication package of the paper "ELFuzz: Efficient Input Generation via LLM-driven Synthesis Over Fuzzer Space."
 
+## Quick start (Docker)
+
+1. Pull the published image: `docker pull ghcr.io/osuseclab/elfuzz:25.08.0`.
+2. Allow core dumps (needed by AFL++ later): `echo core > /proc/sys/kernel/core_pattern`.
+3. Launch the container with adequate CPU/disk (example below is what we used):  
+   `docker run --storage-opt size=100G --cpus 30 -it --add-host=host.docker.internal:host-gateway -v /tmp/host:/tmp/host -v /var/run/docker.sock:/var/run/docker.sock --name elfuzz ghcr.io/osuseclab/elfuzz:25.08.0`
+4. Inside the container, run a smoke test with small resources:  
+   `elfuzz synth -T fuzzer.elfuzz jsoncpp --use-small-model --evolution-iterations 1`
+
+## How to use the ELFuzz CLI
+
+- The CLI lives in `cli/` and is exposed as `elfuzz` inside the Docker image (or `python -m cli.main` on the host). Run `elfuzz --help` for top-level commands.
+- Common flows (all paths relative to the container’s `/home/appuser/elmfuzz/`):
+  - Synthesize fuzzers or artifacts: `elfuzz synth -T fuzzer.elfuzz jsoncpp --use-small-model` or `elfuzz synth -T grammar.glade jsoncpp`.
+  - Produce seed test cases: `elfuzz produce -T elfuzz jsoncpp --time 60` (writes under `extradata/seeds/raw/jsoncpp/`).
+  - Minimize seeds: `elfuzz minimize -T elfuzz jsoncpp` (tarballs end up in `extradata/seeds/cmined_with_control_bytes/`).
+  - Run evaluations (RQ1 coverage and AFL campaigns): `elfuzz run rq1.seed_cov -T elfuzz jsoncpp` or `elfuzz run rq1.afl --fuzzers "elfuzz,grmr,isla,islearn,glade" --repeat 10 "jsoncpp,libxml2,re2,cpython3,sqlite3,cvc5,librsvg"`.
+- Development on the host: you can call `python -m cli.main` from the repo root, but most experiments assume the container environment, symlink layout, and data pulled via `elfuzz download`.
+
+## Target scope and cautions
+
+- Supported/validated benchmarks are: `jsoncpp`, `libxml2`, `re2`, `cpython3`, `sqlite3`, `cvc5`, and `librsvg`. The CLI choices enforce this list.
+- Do not point the tooling at arbitrary projects without adding a proper harness and adapters; paths and expectations (e.g., AFL++ integration, grammar mining layouts) are wired to the benchmarks above.
+- Generated artifacts are large. Keep `extradata/`, `preset/`, and `tmp/` out of commits and be aware runs can consume tens of GB.
+
 ## Experiment data
 
 The experiment data are published on [Zenodo](https://doi.org/10.5281/zenodo.15833146).
@@ -50,6 +75,14 @@ Explanation of the command is as follows:
 This will enter a shell into the container. Then, following the instructions in `/elfuzz/README.md` (which is a symlink to [docker_readme.md](docker_readme.md) in this repository) to replicate the experiments.
 
 The Docker image has only been tested on X86-64 machines.
+
+## Development and linting
+
+- Python environment: use `uv` to manage the venv and tools. Create once with `UV_CACHE_DIR=.uv-cache uv venv .venv && source .venv/bin/activate`.
+- Install dev tooling from `pyproject.toml` extras: `uv pip install -e '.[dev]'`.
+- Python lint/format: `uv run ruff check .` and `uv run ruff format .` (ruff uses settings in `pyproject.toml`). `uv run black .` is available if you prefer Black’s formatter.
+- Rust (only under `evaluation/glade/sqlite3_parser/`): run `cargo fmt` and `cargo test`.
+- Shell: keep scripts POSIX/bash-friendly; use `shellcheck` where available. See `.editorconfig` for consistent indentation and newlines.
 
 ## How to build the Docker image
 

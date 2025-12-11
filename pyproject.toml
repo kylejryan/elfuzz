@@ -1,0 +1,51 @@
+[project]
+name = "elfuzz"
+version = "0.0.0"
+description = "ELFuzz replication package tooling"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "ruff==0.6.9",
+  "black==24.10.0",
+]
+
+[tool.setuptools]
+# Only install the CLI package; other directories are datasets or experiment outputs.
+packages = ["cli"]
+
+[tool.setuptools.package-data]
+cli = ["config.toml", "relocate.json", "elfuzz"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+extend-exclude = """
+(
+  /extradata/
+  |/preset/
+  |/tmp/
+  |/artifacts/
+  |/evaluation/results/
+)
+"""
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = [
+  "extradata",
+  "preset",
+  "tmp",
+  "artifacts",
+  "evaluation/results",
+]
+lint.select = ["E", "F", "I", "W", "B"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["cli"]

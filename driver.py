@@ -1,3 +1,10 @@
+"""
+Utilities for running target functions in a constrained sandbox (time, memory, tempdir)
+so fuzzer generation and evaluation steps cannot overwhelm the host environment.
+
+This module is imported by CLI commands; avoid changing behavior without updating the
+associated smoke tests and container workflows.
+"""
 from collections import namedtuple
 import io
 import json
